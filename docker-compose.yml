@@ -42,10 +42,10 @@ services:
     image: gomicro/goose:3.25.0
     container_name: goose
     environment:
-      GOOSE_DRIVER: ${GOOSE_DRIVER}
-      GOOSE_DBSTRING: ${PG_DSN}
-      GOOSE_MIGRATION_DIR: ${GOOSE_MIGRATION_DIR}
-      GOOSE_TABLE: ${GOOSE_TABLE}
+      GOOSE_DRIVER: postgres
+      GOOSE_DBSTRING: postgres://postgres:password@db:5432/template-db?sslmode=disable
+      GOOSE_MIGRATION_DIR: /migrations
+      GOOSE_TABLE: schema_db
     volumes:
       - ./migrations:/migrations
     networks:
