@@ -7,9 +7,10 @@ import (
 )
 
 type Config struct {
-	Postgres Postgres
-	Server   Server
-	Logger   Logger
+	Postgres  Postgres
+	Server    Server
+	Logger    Logger
+	Tokenizer Tokenizer
 }
 
 type Server struct {
@@ -19,6 +20,12 @@ type Server struct {
 type Postgres struct {
 	DSN         string        `env:"PG_DSN" env-required:"true"`
 	ConnTimeout time.Duration `env:"PG_CONN_TIMEOUT" env-default:"5s"`
+}
+
+type Tokenizer struct {
+	IssuerName           string        `env:"ISSUER_NAME" env-default:"template"`
+	AccessTokenSecretKey string        `env:"ACCESS_TOKEN_SECRET" env-required:"true"`
+	AccessTokenExpire    time.Duration `env:"access_token_expire" env-default:"12h"`
 }
 
 type Logger struct {

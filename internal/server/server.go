@@ -2,6 +2,7 @@ package server
 
 import (
 	"xaxaton/internal/handler"
+	"xaxaton/internal/middleware"
 
 	"github.com/gofiber/fiber/v2"
 )
@@ -11,26 +12,11 @@ type Server struct {
 }
 
 func NewServer() *Server {
-	app := fiber.New(fiber.Config{
-		ErrorHandler: fiber.DefaultErrorHandler,
-	})
-
-	app.Use(RecoverMiddleware)
-
 	return &Server{
-		server: app,
+		server: fiber.New(fiber.Config{
+			ErrorHandler: fiber.DefaultErrorHandler,
+		}),
 	}
-}
-
-func RecoverMiddleware(ctx *fiber.Ctx) error {
-	defer func() {
-		if err := recover(); err != nil {
-			ctx.Context().Logger().Printf("%v", err)
-			ctx.Context().SetStatusCode(fiber.ErrInternalServerError.Code)
-		}
-	}()
-
-	return ctx.Next()
 }
 
 func (s *Server) Run(addr string) error {
@@ -41,6 +27,6 @@ func (s *Server) Shutdown() error {
 	return s.server.Shutdown()
 }
 
-func (s *Server) InitRoutes(handler *handler.Handler) {
-	s.server.Get("/", handler.Template)
+func (s *Server) InitRoutes(handler *handler.Handler, middleware middleware.Middleware) {
+	s.server.Use(middleware.RecoverMiddleware())
 }

@@ -5,11 +5,13 @@ import (
 	"os"
 	"os/signal"
 	"syscall"
-	"xaxaton/config"
+	"xaxaton/internal/config"
 	"xaxaton/internal/handler"
+	"xaxaton/internal/middleware"
 	"xaxaton/internal/repository"
 	"xaxaton/internal/repository/postgres"
 	"xaxaton/internal/server"
+	"xaxaton/internal/tokenizer"
 	"xaxaton/internal/usecase"
 	"xaxaton/pkg/logger"
 )
@@ -27,12 +29,15 @@ func main() {
 	}
 	defer pgPool.Close()
 
+	tokenizer := tokenizer.New(cfg.Tokenizer)
+	middleware := middleware.New(tokenizer)
+
 	repo := repository.New(pgPool)
-	usecase := usecase.New(repo, log)
+	usecase := usecase.New(repo, tokenizer, log)
 	handler := handler.New(usecase)
 
 	srv := server.NewServer()
-	srv.InitRoutes(handler)
+	srv.InitRoutes(handler, middleware)
 
 	go func() {
 		if err := srv.Run(cfg.Server.Addr); err != nil {

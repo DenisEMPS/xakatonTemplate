@@ -2,7 +2,7 @@ package postgres
 
 import (
 	"context"
-	"xaxaton/config"
+	"xaxaton/internal/config"
 
 	"github.com/jackc/pgx/v5/pgxpool"
 )
