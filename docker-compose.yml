@@ -9,19 +9,34 @@ services:
     restart: always
     networks:
       - localnetwork
-    environment:
-      POSTGRES_USER: ${DB_USER:-postgres}
-      POSTGRES_PASSWORD: ${DB_PASSWORD}
-      POSTGRES_DB: ${DB_NAME:-template}
+    env_file:
+      - .env
+    container_name: template-db-1
     ports:
-      - "${DB_PORT:-5432}:5432"
+      - "${POSTGRES_PORT:-5432}:5432"
     volumes:
-      - pgdata:/var/lib/postgresql/data
+      - pg_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-postgres} -d ${DB_NAME:-template}"]
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres} -d ${POSTGRES_DB:-template}"]
       interval: 5s
-      timeout: 5s
+      timeout: 3s
       retries: 5
+  
+  template-service:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    env_file:
+      - .env
+    container_name: template-app
+    restart: unless-stopped
+    networks:
+      - localnetwork
+    ports:
+      - "${APP_PORT:-8080}:8080"
+    depends_on:
+      db:
+        condition: service_healthy
 
   goose:
     image: gomicro/goose:3.25.0
@@ -39,3 +54,6 @@ services:
     depends_on:
       db:
         condition: service_healthy
+
+volumes:
+  pg_data:
