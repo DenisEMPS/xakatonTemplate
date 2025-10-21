@@ -1,6 +1,7 @@
 package main
 
 import (
+	"log/slog"
 	"os"
 	"os/signal"
 	"syscall"
@@ -21,7 +22,7 @@ func main() {
 
 	pgPool, err := postgres.NewPool(cfg.Postgres)
 	if err != nil {
-		log.Error("failed to init pool connection: " + err.Error())
+		log.Error("failed to init pool connection", slog.Any("error", err))
 		os.Exit(1)
 	}
 	defer pgPool.Close()
@@ -35,7 +36,7 @@ func main() {
 
 	go func() {
 		if err := srv.Run(cfg.Server.Addr); err != nil {
-			log.Error("failed to start server: " + err.Error())
+			log.Error("failed to start server", slog.Any("error", err))
 			os.Exit(1)
 		}
 	}()
@@ -47,6 +48,6 @@ func main() {
 	<-quit
 
 	if err := srv.Shutdown(); err != nil {
-		log.Error("failed to stop server: " + err.Error())
+		log.Error("failed to stop server", slog.Any("error", err))
 	}
 }

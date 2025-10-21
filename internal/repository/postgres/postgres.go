@@ -8,7 +8,7 @@ import (
 )
 
 func NewPool(cfg config.Postgres) (*pgxpool.Pool, error) {
-	ctx, cancel := context.WithTimeout(context.Background(), cfg.ConnTimeOut)
+	ctx, cancel := context.WithTimeout(context.Background(), cfg.ConnTimeout)
 	defer cancel()
 
 	connectedPool, err := pgxpool.New(ctx, cfg.DSN)

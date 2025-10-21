@@ -18,7 +18,7 @@ type Server struct {
 
 type Postgres struct {
 	DSN         string        `env:"PG_DSN" env-required:"true"`
-	ConnTimeOut time.Duration `env:"PG_CONN_TIMEOUT" env-default:"5s"`
+	ConnTimeout time.Duration `env:"PG_CONN_TIMEOUT" env-default:"5s"`
 }
 
 type Logger struct {
