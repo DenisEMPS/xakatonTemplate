@@ -2,6 +2,7 @@ package middleware
 
 import (
 	"errors"
+	"strings"
 	"xaxaton/internal/tokenizer"
 
 	"github.com/gofiber/fiber/v2"
@@ -62,16 +63,18 @@ func (m *middleware) JWT() fiber.Handler {
 }
 
 func extractToken(c *fiber.Ctx) (string, error) {
-	tokenStruct := tokenizer.TokenStruct{}
+	authHeader := c.Get(AuthorizationHeader)
 
-	err := c.BodyParser(&tokenStruct)
-	if err != nil {
-		return "", err
+	if authHeader == "" {
+		return "", errors.New("auth header is empty")
 	}
 
-	if tokenStruct.AccessToken == "" {
-		return "", errors.New("authorization header not provided")
+	authHeader = strings.TrimSpace(authHeader)
+	tokenParts := strings.Split(authHeader, " ")
+
+	if len(tokenParts) != 2 || !strings.EqualFold(tokenParts[0], BearerScheme) {
+		return "", errors.New("invalid token format")
 	}
 
-	return tokenStruct.AccessToken, nil
+	return tokenParts[1], nil
 }

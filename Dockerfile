@@ -45,7 +45,6 @@ USER appuser
 
 WORKDIR /app
 
-EXPOSE 8080
 EXPOSE 3001
 
 CMD ["./app"]
