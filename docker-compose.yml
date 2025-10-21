@@ -1,0 +1,41 @@
+
+networks:
+  localnetwork:
+    driver: bridge
+
+services:
+  db:
+    image: postgres:16
+    restart: always
+    networks:
+      - localnetwork
+    environment:
+      POSTGRES_USER: ${DB_USER:-postgres}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: ${DB_NAME:-template}
+    ports:
+      - "${DB_PORT:-5432}:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-postgres} -d ${DB_NAME:-template}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  goose:
+    image: gomicro/goose:3.25.0
+    container_name: goose
+    environment:
+      GOOSE_DRIVER: ${GOOSE_DRIVER}
+      GOOSE_DBSTRING: ${PG_DSN}
+      GOOSE_MIGRATION_DIR: ${GOOSE_MIGRATION_DIR}
+      GOOSE_TABLE: ${GOOSE_TABLE}
+    volumes:
+      - ./migrations:/migrations
+    networks:
+      - localnetwork
+    entrypoint: goose up
+    depends_on:
+      db:
+        condition: service_healthy

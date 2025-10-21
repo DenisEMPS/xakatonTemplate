@@ -1,0 +1,27 @@
+version: "2"
+
+overrides:
+  go:
+    overrides:
+        - db_type: "uuid"
+          engine: "postgresql"
+          go_type:
+            import: "github.com/google/uuid"
+            type: "UUID"
+
+sql: 
+  - engine: "postgresql"
+    name: "template"
+    schema: "migrations/"
+    queries: "sqlc/queries"
+
+    gen: 
+      go: 
+        out:
+          "internal/repository/sqlc"
+        package: "sqlc"
+        sql_package: "pgx/v5"
+        emit_interface: true
+        emit_result_struct_pointers: true
+        emit_pointers_for_null_types: true
+        omit_unused_structs: true
